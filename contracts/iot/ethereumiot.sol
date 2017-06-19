@@ -40,22 +40,22 @@ contract Doug {
     }
 
     // Add a new contract to Doug. This will overwrite an existing contract.
-    function addContract(bytes32 name, address addr) onlyOwner returns (bool result) {
+    function addContract(string name, address addr) onlyOwner returns (bool result) {
         DougEnabled de = DougEnabled(addr);
         // Don't add the contract if this does not work.
         if(!de.setDougAddress(address(this))) {
             return false;
         }
-        contracts[name] = addr;
+        contracts[sha3(name)] = addr;
         return true;
     }
 
     // Remove a contract from Doug. We could also selfdestruct if we want to.
-    function removeContract(bytes32 name) onlyOwner returns (bool result) {
-        if (contracts[name] == 0x0){
+    function removeContract(string name) onlyOwner returns (bool result) {
+        if (contracts[sha3(name)] == 0x0){
             return false;
         }
-        contracts[name] = 0x0;
+        contracts[sha3(name)] = 0x0;
         return true;
     }
 
@@ -77,13 +77,17 @@ contract Doug {
         // and when suiciding it will all go to the owner.
         selfdestruct(owner);
     }
+    
+    function contracts(string name) returns (address addr) {
+        return contracts[sha3(name)];
+    }
 
 }
 
 
 // Interface for getting contracts from Doug
 contract ContractProvider {
-    function contracts(bytes32 name) returns (address addr) {}
+    function contracts(string name) returns (address addr) {}
 }
 
 
@@ -101,6 +105,112 @@ contract AppManagerEnabled is DougEnabled {
     }
 }
 
+// The application manager
+contract AppManager is DougEnabled {
+
+    // App owner
+    address owner;
+
+    // Constructor
+    function AppManager() {
+        owner = msg.sender;
+    }
+
+    function addDevice(address device_address, bytes32 device_pubkey, address device_owner) returns (bool result) {
+      // Getting current DeviceManager contract from Doug
+      var deviceManager = ContractProvider(DOUG).contracts('DeviceManager');
+
+      // No no need to check permissions, anyone can add device (for gas)
+      // Checking deviceManager existance only
+      if (deviceManager == 0x0)
+      {
+        return false;
+      }
+
+      // Diving to next managing level
+      bool success = DeviceManager(deviceManager).addDevice(device_address, device_pubkey, device_owner);
+
+      return success;
+    }
+
+    /*function addOffer(address device_address, int32 value, string meta) returns (bool result) {
+      // Getting current DeviceManager contract from Doug
+      offersManager = ContractProvider(DOUG).contracts('OffersManager'))
+
+      // No no need to check permissions, anyone can add device (for gas)
+      // Checking deviceManager existance only
+      if (offersManager == 0x0)
+      {
+        return false;
+      }
+
+      // Diving to next managing level
+      bool success = OffersManager(offersManager).addOffer(address device_address, int32 value, string meta);
+
+      return success;
+    }*/
+
+    
+    // TODO: switchoff
+    /*function delDevice(address device_address) returns (bool result) {
+      // Getting current DeviceManager contract from Doug
+      var deviceManager = ContractProvider(DOUG).contracts('DeviceManager');
+
+      // No no need to check permissions, anyone can add device (for gas)
+      // Checking deviceManager existance only
+      if (deviceManager == 0x0)
+      {
+        return false;
+      }
+
+      // Diving to next managing level
+      bool success = DeviceManager(deviceManager).delDevice(device_address);
+
+      return success;
+    }*/
+
+    /*function delOffer(address offer_address) returns (bool result) {
+      // Getting current DeviceManager contract from Doug
+      offersManager = ContractProvider(DOUG).contracts('OffersManager'))
+
+      // No no need to check permissions, anyone can add device (for gas)
+      // Checking deviceManager existance only
+      if (offersManager == 0x0)
+      {
+        return false;
+      }
+
+      // Diving to next managing level
+      bool success = OffersManager(offersManager).delOffer(address offer_address);
+
+      return success;
+    }*/
+
+
+    // TODO
+    /*function addDeviceType() {}
+      function delDeviceType() {}*/
+
+    // TODO
+    /*function getAllDevices() static {}
+    function getAllOffers() static {}
+    function getAllDevicesByUser() static {}
+    function getAllOffersByRegion() static {}*/
+
+    //--------------------review-------------------------------
+    // Set the permissions for a given address.
+    /*function setPermission(address addr, uint8 permLvl) returns (bool res) {
+        if (msg.sender != owner){
+            return false;
+        }
+        address perms = ContractProvider(DOUG).contracts("perms");
+        if ( perms == 0x0 ) {
+            return false;
+        }
+        return Permissions(perms).setPermission(addr,permLvl);
+    }*/
+    //---------------------------------------------------------
+}
 
 contract DeviceManager is AppManagerEnabled {
 

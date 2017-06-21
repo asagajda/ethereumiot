@@ -77,7 +77,7 @@ contract Doug {
         // and when suiciding it will all go to the owner.
         selfdestruct(owner);
     }
-    
+
     function contracts(string name) returns (address addr) {
         return contracts[sha3(name)];
     }
@@ -150,7 +150,7 @@ contract AppManager is DougEnabled {
       return success;
     }*/
 
-    
+
     // TODO: switchoff
     /*function delDevice(address device_address) returns (bool result) {
       // Getting current DeviceManager contract from Doug

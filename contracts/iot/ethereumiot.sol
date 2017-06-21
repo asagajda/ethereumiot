@@ -133,6 +133,23 @@ contract AppManager is DougEnabled {
       return success;
     }
 
+    function getDeviceById(uint idx)
+    returns(address device_address, bytes32 device_pubkey, address device_owner, bool device_active){
+      // Getting current DeviceManager contract from Doug
+      var deviceManager = ContractProvider(DOUG).contracts('DeviceManager');
+
+      // No no need to check permissions, anyone can add device (for gas)
+      // Checking deviceManager existance only
+      if (deviceManager == 0x0)
+      {
+        return (0x0, 0, 0x0, false);
+      }
+
+      // Diving to next managing level
+      return DeviceManager(deviceManager).getDeviceById(idx);
+
+    }
+
     /*function addOffer(address device_address, int32 value, string meta) returns (bool result) {
       // Getting current DeviceManager contract from Doug
       offersManager = ContractProvider(DOUG).contracts('OffersManager'))

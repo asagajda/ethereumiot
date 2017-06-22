@@ -308,7 +308,7 @@ library DeviceLibrary {
     var idx = getDevicesCount(_storageContract);
     EternalStorage(_storageContract).setAddressValue(sha3("device_address_", idx), _address);
     EternalStorage(_storageContract).setBytes32Value(sha3("device_pubkey_", idx), _pubkey);
-    EternalStorage(_storageContract).setAddressValue(sha3("device_owner_", idx), _address);
+    EternalStorage(_storageContract).setAddressValue(sha3("device_owner_", idx), _owner);
     EternalStorage(_storageContract).setBooleanValue(sha3("device_active_", idx), true);
     EternalStorage(_storageContract).setUIntValue(sha3("DevicesCount"), idx + 1);
     return true; // TODO: return id

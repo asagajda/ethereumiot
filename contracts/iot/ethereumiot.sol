@@ -296,8 +296,7 @@ library DeviceLibrary {
 
   function getTurnedOnDevicesCount(address _storageContract) constant returns(uint256)
   {
-    return EternalStorage(_storageContract).getUIntValue(sha3("DevicesCount")) -
-    EternalStorage(_storageContract).getUIntValue(sha3("OnDevicesCount"));
+    return EternalStorage(_storageContract).getUIntValue(sha3("DevicesCount"))-EternalStorage(_storageContract).getUIntValue(sha3("OnDevicesCount"));
     //TODO: or return 0
   }
 
@@ -307,9 +306,18 @@ library DeviceLibrary {
     //TODO: check collision
     var idx = getDevicesCount(_storageContract);
     EternalStorage(_storageContract).setAddressValue(sha3("device_address_", idx), _address);
+    EternalStorage(_storageContract).setIdToValue(sha3("device_address_", idx), idx, "device", "address");
+
     EternalStorage(_storageContract).setBytes32Value(sha3("device_pubkey_", idx), _pubkey);
+    EternalStorage(_storageContract).setIdToValue(sha3("device_pubkey_", idx), idx, "device", "pubkey");
+
+
     EternalStorage(_storageContract).setAddressValue(sha3("device_owner_", idx), _owner);
+    EternalStorage(_storageContract).setIdToValue(sha3("device_owner_", idx), idx, "device", "owner");
+
     EternalStorage(_storageContract).setBooleanValue(sha3("device_active_", idx), true);
+    EternalStorage(_storageContract).setIdToValue(sha3("device_active_", idx), idx, "device", "active");
+
     EternalStorage(_storageContract).setUIntValue(sha3("DevicesCount"), idx + 1);
     return true; // TODO: return id
   }
@@ -362,9 +370,14 @@ library DeviceLibrary {
       return (false);
     }
     EternalStorage(_storageContract).setAddressValue(sha3("device_address_", idx), _address);
+
+
     EternalStorage(_storageContract).setBytes32Value(sha3("device_pubkey_", idx), _pubkey);
+
     EternalStorage(_storageContract).setAddressValue(sha3("device_owner_", idx), _address);
+
     EternalStorage(_storageContract).setBooleanValue(sha3("device_active_", idx), true);
+
     return true;
   }
 
@@ -449,4 +462,21 @@ contract EternalStorage{
     {
         IntStorage[record] = value;
     }
+
+    // Id tracking mapping
+    mapping(bytes32=>string) idStorage;
+
+    function getIdByValue(bytes32 val) constant returns (int id, string table, string column)
+    {
+        table_column_id = idStorage[val];
+        return (table_column_id.toSlice("_"), table_column_id.toSlice("_"), table_column_id);
+    }
+
+    function setIdToValue(bytes32 val, int id, string column, string table)
+    {
+        idStorage[val] = table."_".column."_".id;
+    }
+
+
+
 }

@@ -150,83 +150,6 @@ contract AppManager is DougEnabled {
 
     }
 
-    /*function addOffer(address device_address, int32 value, string meta) returns (bool result) {
-      // Getting current DeviceManager contract from Doug
-      offersManager = ContractProvider(DOUG).contracts('OffersManager'))
-
-      // No no need to check permissions, anyone can add device (for gas)
-      // Checking deviceManager existance only
-      if (offersManager == 0x0)
-      {
-        return false;
-      }
-
-      // Diving to next managing level
-      bool success = OffersManager(offersManager).addOffer(address device_address, int32 value, string meta);
-
-      return success;
-    }*/
-
-
-    // TODO: switchoff
-    /*function delDevice(address device_address) returns (bool result) {
-      // Getting current DeviceManager contract from Doug
-      var deviceManager = ContractProvider(DOUG).contracts('DeviceManager');
-
-      // No no need to check permissions, anyone can add device (for gas)
-      // Checking deviceManager existance only
-      if (deviceManager == 0x0)
-      {
-        return false;
-      }
-
-      // Diving to next managing level
-      bool success = DeviceManager(deviceManager).delDevice(device_address);
-
-      return success;
-    }*/
-
-    /*function delOffer(address offer_address) returns (bool result) {
-      // Getting current DeviceManager contract from Doug
-      offersManager = ContractProvider(DOUG).contracts('OffersManager'))
-
-      // No no need to check permissions, anyone can add device (for gas)
-      // Checking deviceManager existance only
-      if (offersManager == 0x0)
-      {
-        return false;
-      }
-
-      // Diving to next managing level
-      bool success = OffersManager(offersManager).delOffer(address offer_address);
-
-      return success;
-    }*/
-
-
-    // TODO
-    /*function addDeviceType() {}
-      function delDeviceType() {}*/
-
-    // TODO
-    /*function getAllDevices() static {}
-    function getAllOffers() static {}
-    function getAllDevicesByUser() static {}
-    function getAllOffersByRegion() static {}*/
-
-    //--------------------review-------------------------------
-    // Set the permissions for a given address.
-    /*function setPermission(address addr, uint8 permLvl) returns (bool res) {
-        if (msg.sender != owner){
-            return false;
-        }
-        address perms = ContractProvider(DOUG).contracts("perms");
-        if ( perms == 0x0 ) {
-            return false;
-        }
-        return Permissions(perms).setPermission(addr,permLvl);
-    }*/
-    //---------------------------------------------------------
 }
 
 contract DeviceManager is AppManagerEnabled {
@@ -277,6 +200,17 @@ contract DeviceManager is AppManagerEnabled {
     eternalStorage.updateDeviceById(_id, device_address, device_pubkey, device_owner);
   }
 
+  function getDevicesIndex() public returns (mapping(bytes32=>HashInfo))
+  {
+    return eternalStorage.HashInfoStorage;
+  }
+
+  struct HashInfo {
+        string table;
+        string column;
+        uint id;
+  }
+
 }
 
 
@@ -306,17 +240,17 @@ library DeviceLibrary {
     //TODO: check collision
     var idx = getDevicesCount(_storageContract);
     EternalStorage(_storageContract).setAddressValue(sha3("device_address_", idx), _address);
-    EternalStorage(_storageContract).setIdToValue(sha3("device_address_", idx), idx, "device", "address");
+    EternalStorage(_storageContract).setInfoToHash(sha3("device_address_", idx), "device", "owner", idx);
 
     EternalStorage(_storageContract).setBytes32Value(sha3("device_pubkey_", idx), _pubkey);
-    EternalStorage(_storageContract).setIdToValue(sha3("device_pubkey_", idx), idx, "device", "pubkey");
+    EternalStorage(_storageContract).setInfoToHash(sha3("device_pubkey_", idx), "device", "owner", idx);
 
 
     EternalStorage(_storageContract).setAddressValue(sha3("device_owner_", idx), _owner);
-    EternalStorage(_storageContract).setIdToValue(sha3("device_owner_", idx), idx, "device", "owner");
+    EternalStorage(_storageContract).setInfoToHash(sha3("device_owner_", idx), "device", "owner", idx);
 
     EternalStorage(_storageContract).setBooleanValue(sha3("device_active_", idx), true);
-    EternalStorage(_storageContract).setIdToValue(sha3("device_active_", idx), idx, "device", "active");
+    EternalStorage(_storageContract).setInfoToHash(sha3("device_active_", idx), "device", "owner", idx);
 
     EternalStorage(_storageContract).setUIntValue(sha3("DevicesCount"), idx + 1);
     return true; // TODO: return id
@@ -370,21 +304,24 @@ library DeviceLibrary {
       return (false);
     }
     EternalStorage(_storageContract).setAddressValue(sha3("device_address_", idx), _address);
-
-
     EternalStorage(_storageContract).setBytes32Value(sha3("device_pubkey_", idx), _pubkey);
-
     EternalStorage(_storageContract).setAddressValue(sha3("device_owner_", idx), _address);
-
     EternalStorage(_storageContract).setBooleanValue(sha3("device_active_", idx), true);
 
     return true;
   }
 
+
 }
 
 
 contract EternalStorage{
+
+    struct HashInfo {
+        string table;
+        string column;
+        uint id;
+    }
 
     mapping(bytes32 => uint) UIntStorage;
 
@@ -464,19 +401,17 @@ contract EternalStorage{
     }
 
     // Id tracking mapping
-    mapping(bytes32=>string) idStorage;
+    mapping(bytes32=>HashInfo) public HashInfoStorage;
 
-    function getIdByValue(bytes32 val) constant returns (int id, string table, string column)
+    function getInfoByHash(bytes32 val) constant returns (string table, string column, uint id)
     {
-        table_column_id = idStorage[val];
-        return (table_column_id.toSlice("_"), table_column_id.toSlice("_"), table_column_id);
+        var info = HashInfoStorage[val];
+        return (info.table, info.column, info.id);
     }
 
-    function setIdToValue(bytes32 val, int id, string column, string table)
+    function setInfoToHash(bytes32 val, string table, string column, uint id)
     {
-        idStorage[val] = table."_".column."_".id;
+        HashInfoStorage[val] = HashInfo(table, column, id);
     }
-
-
 
 }

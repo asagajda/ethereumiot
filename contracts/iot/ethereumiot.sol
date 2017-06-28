@@ -150,7 +150,6 @@ contract AppManager is DougEnabled {
       return DeviceManager(deviceManager).getDeviceById(idx);
     }
 
-
     function switchOffDeviceById(uint idx) returns (bool result)
     {
       // Getting current DeviceManager contract from Doug
@@ -176,7 +175,6 @@ contract AppManager is DougEnabled {
 
       return DeviceManager(deviceManager).switchOnDeviceById(idx);
     }
-
 
 }
 
@@ -228,6 +226,12 @@ contract DeviceManager is AppManagerEnabled {
     eternalStorage.updateDeviceById(_id, device_address, device_pubkey, device_owner);
   }
 
+  struct HashInfo {
+        string table;
+        string column;
+        uint id;
+  }
+
 }
 
 library DeviceLibrary {
@@ -261,12 +265,12 @@ library DeviceLibrary {
     EternalStorage(_storageContract).setBytes32Value(sha3("device_pubkey_", idx), _pubkey);
     EternalStorage(_storageContract).setInfoToHash(sha3("device_pubkey_", idx), "device", "pubkey", idx);
 
-
     EternalStorage(_storageContract).setAddressValue(sha3("device_owner_", idx), _owner);
     EternalStorage(_storageContract).setInfoToHash(sha3("device_owner_", idx), "device", "owner", idx);
 
     EternalStorage(_storageContract).setBooleanValue(sha3("device_active_", idx), true);
     EternalStorage(_storageContract).setInfoToHash(sha3("device_active_", idx), "device", "active", idx);
+
 
     EternalStorage(_storageContract).setUIntValue(sha3("DevicesCount"), idx + 1);
     return true; // TODO: return id
@@ -321,11 +325,13 @@ library DeviceLibrary {
     }
     EternalStorage(_storageContract).setAddressValue(sha3("device_address_", idx), _address);
     EternalStorage(_storageContract).setBytes32Value(sha3("device_pubkey_", idx), _pubkey);
+
     EternalStorage(_storageContract).setAddressValue(sha3("device_owner_", idx), _owner);
     EternalStorage(_storageContract).setBooleanValue(sha3("device_active_", idx), true);
 
     return true;
   }
+
 }
 
 
@@ -409,9 +415,11 @@ contract EternalStorage is DougEnabled { // set doug enabled?
     }
 
     // Id tracking mapping
+
     bool constant PREV = false;
     bool constant NEXT = true;
     mapping(bytes32 =>  mapping(bool => bytes32) ) dllIndex;
+
     mapping(bytes32=>HashInfo) public HashInfoStorage;
 
     function getInfoByHash(bytes32 val) constant returns (string table, string column, uint id)
@@ -419,6 +427,7 @@ contract EternalStorage is DougEnabled { // set doug enabled?
         var info = HashInfoStorage[val];
         return (info.table, info.column, info.id);
     }
+
 
     struct HashInfo {
         string table;
@@ -446,4 +455,5 @@ contract Fixtures {
     _storage.addDevice(0xca35b7d915458ef540ade6068dfe2f44e8fa733c, 123, 0x14723a09acff6d2a60dcdf7aa4aff308fddc160c);
     _storage.addDevice(0x4b0897b0513fdc7c541b6d9d7e929c4e5364d2db, 123, 0x583031d1113ad414f02576bd6afabfb302140225);
   }
+
 }

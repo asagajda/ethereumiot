@@ -117,7 +117,7 @@ contract AppManager is DougEnabled {
         owner = msg.sender;
     }
 
-    function addDevice(address device_address, bytes32 device_pubkey, address device_owner) returns (bool result) {
+    function addDevice(address device_address, bytes32 device_pubkey, address device_owner) public returns (bool result) {
       // Getting current DeviceManager contract from Doug
       var deviceManager = ContractProvider(DOUG).contracts('DeviceManager');
 
@@ -134,7 +134,7 @@ contract AppManager is DougEnabled {
       return success;
     }
 
-    function getDeviceById(uint idx)
+    function getDeviceById(uint idx) constant public 
     returns(address device_address, bytes32 device_pubkey, address device_owner, bool device_active){
       // Getting current DeviceManager contract from Doug
       var deviceManager = ContractProvider(DOUG).contracts('DeviceManager');
@@ -225,6 +225,7 @@ contract DeviceManager is AppManagerEnabled {
   {
     eternalStorage.updateDeviceById(_id, device_address, device_pubkey, device_owner);
   }
+
 
   struct HashInfo {
         string table;

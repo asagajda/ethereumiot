@@ -5,7 +5,7 @@ import "./DeviceManager.sol";
 
 // The application manager
  /*a = appManagerContract.addDevice("0x4d4be4a4526f1cfe2eee78c993626922407b7bf5", 123, "0x22db9bac1ef521aea55b6aa5549de009de8fd8a9",{from:ETHEREUM_CLIENT.eth.defaultAccount, gas:3000000,}, function(e,result){console.log(result)});*/
-contract Ap pManager is DougEnabled {
+contract AppManager is DougEnabled {
 
     // App owner
     address owner;
